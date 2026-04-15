@@ -1,5 +1,6 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
-import z, { symbol } from 'zod';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import z from 'zod';
+import { createMcpHandler } from 'agents/mcp';
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
@@ -30,7 +31,11 @@ export default {
 			},
 		);
 
-		return new Response('ByeBye World!');
+		// transport mode - but way that MCP server and Ai communicate will change
+		// handler works like doorman - which can people can communicate with our MCP server
+		const handler = createMcpHandler(server);
+
+		return handler(request, env, ctx);
 	},
 } satisfies ExportedHandler<Env>;
 
