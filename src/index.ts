@@ -47,6 +47,9 @@ const widgetHtml = /* html */ `<!DOCTYPE html>
   	{name: 'Stocks App', version: '1.0'}
   )
 
+  // 아래의 resourceUri: 'ui://stocks-ui', 가 보여진 후
+  //데이터 로딩이 끝난 후에야 아래 app이 보여지는 구조
+  //chatgpt가 iframe(resourceUri)에 메시지를 보내는 것
   app.ontoolresult = ({structuredContent}) => {
   	if(!structuredContent) return;
   	document.getElementById("price-card").innerHTML = structuredContent.price;
@@ -89,13 +92,22 @@ export default {
 					symbol: z.string(),
 				},
 				// registerAppTool로 텍스트 뿐만이 아니라 아래의 ui도 같이 보여달라고 말하게 되는 것
+				// 일단 tool 을 호출하면 아래 리소스부터 보여주기 시작함 - tool처리하는데 시간이 오래 걸릴 수 도 있으니
+				// 로딩화면 같은거를 보여줄 수 있으니
 				_meta: {
 					ui: {
 						resourceUri: 'ui://stocks-ui',
 					},
+					'openai/toolInvocation/invoking': 'Getting Stocks,,,',
+					'openai/toolInvocation/invoked': 'Search completed',
+				},
+				annotations: {
+					openWorldHint: true,
+					readOnlyHint: true,
 				},
 			},
 			async ({ symbol }) => {
+				await new Promise((r) => setTimeout(r, 10000));
 				return {
 					content: [
 						{
@@ -104,6 +116,8 @@ export default {
 						},
 					],
 					//widget에도 데이타를 보내고 싶은 경우
+					// 여기를 최대한 간결하게 짜야 함
+					// 그렇지 않으면 Ai model의 context
 					structuredContent: {
 						price: 10,
 					},
